@@ -1,0 +1,13 @@
+* {
+    box-sizing: border-box;
+    color: #101010;
+    font-family: 'Noto Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#home_img {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
