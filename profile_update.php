@@ -1,6 +1,11 @@
 <html>
     <?php
     session_start();
+
+    if (!isset($_SESSION['loggedin'])) {
+        header('Location: login.php');
+        exit;
+    }
 	
 	//
 	function tl_format ($date) {
@@ -16,32 +21,34 @@
         <title>Update Profile</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href='https://fonts.googleapis.com/css?family=Noto Sans' rel='stylesheet'>
+        <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+        <link rel="stylesheet" href="style.css" type="text/css">
     </head>
 
     <body class="bg-light" style="font-family: sans-serif">
 
         <?php include "header.php"?>
-		
+
+        <?php if (isset($_SESSION['imgErr'])) {?>
+            <div class="container">
+                <div class="alert btn-secondary">
+                    <?php echo $_SESSION['imgErr']; unset($_SESSION['imgErr'])?>
+                    <a href="#" class="close text-white" data-dismiss="alert">&times;</a>
+                </div>
+            </div>
+        <?php } ?>
+
 		<form action="update_process.php" method="post" enctype="multipart/form-data">
             <main class="row mx-auto" id="formarea" style="max-width: 90%">
-				<section class="container pl-sm-3 pt-2 pb-2">
+				<section class="container pl-lg-3 pt-2 pb-2">
 					<h3>Update Profil</h3>
 				</section>
-                <?php if (isset($_SESSION['imgErr'])) {?>
-                <div class="container mr-3 mb-4" style="max-width: 350px">
-                    <div class="alert btn-secondary">
-                        <?php echo $_SESSION['imgErr']; unset($_SESSION['imgErr'])?>
-                        <a href="#" class="close text-white" data-dismiss="alert">&times;</a>
-                    </div>
-                </div>
-                <?php } ?>
-                <aside class="col-sm-3">
+                <aside class="col-9 col-md-5 mx-auto col-lg-4 col-xl-3">
                     <div class="container shadow card border-0 py-3">
                         <section class="container card border-0 py-3">
-                            <img onerror="this.onerror = null; this.src='pfp/blank.png'" id="photo_preview" src=<?php echo $_SESSION['imgUrl'] ."?=". filemtime($_SESSION['imgUrl']) ?>>
+                            <img onerror="this.onerror = null; this.src='pfp/blank.png'" id="photo_preview" src=<?php echo $_SESSION['imgUrl']?>>
                         </section>
                         <section class="container">
 							<label for="file">Pilih photo profilmu: </label>
@@ -52,20 +59,20 @@
                         </section>
                     </div>
                 </aside>
-                <article class="col-sm-9">
+                <article class="col-lg-8 col-xl-9">
 					<fieldset class="container shadow card border-0 py-3">
 						<div class="row">
-							<section class="col-sm-6">
+							<section class="col-lg-6">
 								<div class="form-group">
 									<label for="nama">Nama</label>
 									<input type="text" class="form-control" id="nama" size="40" placeholder="Masukkan Nama.." name='nama' value='<?php echo $_SESSION['nama']?>' pattern="[a-zA-Z-'., ]*$" required>
 								</div>
 								<div class="form-row">
-                                    <div class="form-group col-sm-7">
-                                        <label for="bp">Tempat</label>
+                                    <div class="form-group col-lg-6">
+                                        <label for="bp">Tempat Lahir</label>
                                         <input type="text" class="form-control" id="bp" size="40" placeholder="Masukkan Tempat Lahir.." name='bp' value='<?php echo $_SESSION['bp']?>' required>
                                     </div>
-                                    <div class="form-group col-sm-5">
+                                    <div class="form-group col-lg-6">
                                         <label for="tl">Tanggal Lahir</label>
                                         <input type="date" class="form-control" id="tl" size="40" name='tl' value=<?php echo $tl?> required>
                                     </div>
@@ -92,7 +99,7 @@
                                     <textarea class="form-control" id="address" placeholder="Masukkan Alamat.." name='address' required><?php echo $_SESSION['address']?></textarea>
                                 </div>
 							</section>
-							<section class="col-sm-6">
+							<section class="col-lg-6">
                                 <div class="form-group">
                                     <label for="nim">NIM</label>
                                     <input type="text" class="form-control" id="nim" size="40" placeholder="Masukkan NIM.." name='nim' maxlength="14" value='<?php echo $_SESSION['nim']?>' pattern="09[0-9]{12}" required>
@@ -144,13 +151,55 @@
 							</section>
 						</div>
 					</fieldset>
-                    <div class="container-fluid text-sm-right text pt-5">
-                        <button type="submit" name="submit" class="btn btn-primary">
-                            <i class='fas fa-save'></i>&nbsp; Simpan
-                        </button>
-                        <button type="submit" name="cancel" class="btn btn-secondary">
-                            <i class='fas fa-arrow-left'></i>&nbsp; Batal
-                        </button>
+                    <div class="text-right row justify-content-end mx-auto pt-5">
+                        <div class="col-lg-2">
+                            <button type="button" class="w-100 btn btn-primary" data-toggle="modal" data-target="#konfirmasiSimpan">
+                                <i class='text-white fas fa-save'></i>&nbsp; Simpan
+                            </button>
+                        </div>
+                        <div class="col-lg-2 pt-3 pt-lg-0">
+                            <button type="button" class="w-100 btn btn-secondary" data-toggle="modal" data-target="#konfirmasiBatal">
+                                <i class='text-white fas fa-arrow-left'></i>&nbsp; Batal
+                            </button>
+                        </div>
+                    </div>
+
+                    <!--Konfirmasi untuk Simpan-->
+                    <div class="modal fade" id="konfirmasiSimpan">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">Konfirmasi Menyimpan Update</h4>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    Apakah anda yakin?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" name="submit" class="btn btn-primary">Ya</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tidak</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Konfirmasi untuk Batal-->
+                    <div class="modal fade" id="konfirmasiBatal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">Konfirmasi Batal Update</h4>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    Apakah anda yakin?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" name="cancel" class="btn btn-secondary">Ya</button>
+                                    <button type="button" class="btn btn-white" data-dismiss="modal">Tidak</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </article>
             </main>
@@ -161,8 +210,21 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-		
+        <script src="smoothscroll.js"></script>
 		<script>
+            $(document).ready(function(){
+            $("a").on('click', function(event) {
+                if (this.hash !== "") {
+                    event.preventDefault();
+                    var hash = this.hash;
+
+                    $('html, body').animate({scrollTop: $(hash).offset().top}, 800, function(){
+                        window.location.hash = hash;
+                        });
+                    }
+                });
+            });
+
 			const preview_photo = function(event) {
                 const photo_preview = document.getElementById('photo_preview');
                 photo_preview.src = URL.createObjectURL(event.target.files[0]);

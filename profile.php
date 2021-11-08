@@ -1,6 +1,11 @@
 <?php
 session_start();
 
+if (!isset($_SESSION['loggedin'])) {
+    header('Location: login.php');
+    exit;
+}
+
 // Fungsi menformat bulan angka jadi nama bulannya
 function profile_date_format($date){
     $date_month = date('m',strtotime($date)); // Mengambil nilai bulan
@@ -15,24 +20,6 @@ function profile_date_format($date){
     return $day . " " . $month . " " . $year;
 }
 
-// Inisialisasi Awal
-if ($_SESSION == null) {
-    $_SESSION['nama'] = "Muhammad Rifqi Ramadhan"; // Nama
-    $_SESSION['nim'] = "09021182025028"; // Nim
-    $_SESSION['bp'] = "Palembang"; // Tempat Lahir (Birthplace)
-    $_SESSION['tl'] = "23-11-2002"; // Tanggal Lahir
-    $_SESSION['sex'] = "Laki-Laki"; // Jenis-Kelamin
-    $_SESSION['t_angk'] = 2020; // Tahun Angkatan
-    $_SESSION['address'] = "jl. Perintis Raya Blok N-10 No.4"; // Alamat
-    $_SESSION['jurusan'] = "Teknik Informatika"; // Jurusan
-    $_SESSION['kampus'] = "Indralaya"; // Kampus
-    $_SESSION['email'] = "mrifqiramadhan2002@gmail.com"; // Email
-    $_SESSION['phonenum'] = "081373668830"; // Nomor Telepon
-
-    $_SESSION['imgErr'] = ""; // Inisialisasi untuk pessan error pada penguploadan gambar
-    $_SESSION['imgUrl'] = "pfp/pfp.jpg"; // Inisialisasi untuk direktori gambar
-    $_SESSION['updated'] = 0; // nilai untuk mentrigger pesan bahwa profile sudah diupdate
-}
 
 // Memasukkan tanggal terformat ke variabel tl
 $tl = profile_date_format($_SESSION['tl']);
@@ -58,37 +45,39 @@ $data_right = array(
 
 <html>
     <head>
-        <title>Profil Mahasiswa</title>
+        <title>Profil Anda</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href='https://fonts.googleapis.com/css?family=Noto Sans' rel='stylesheet'>
+        <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+        <link rel="stylesheet" href="style.css" type="text/css">
     </head>
 
     <body class="bg-light">
 
         <?php include "header.php"?>
+
+        <?php if (isset($_SESSION['updated'])) { ?> <!--Jika nilainya diset maka dimunculkan-->
+        <div class="container">
+            <div class="alert btn-primary">
+                Profil berhasil di update
+                <a href="#" class="close text-white" data-dismiss="alert">&times;</a>
+            </div>
+        </div><?php unset($_SESSION['updated']);} ?>
 		
         <main class="row mx-auto" style="max-width: 90%">
-            <section class="container pl-sm-3 py-3">
-                <h3>Profil Mahasiswa</h3>
+            <section class="container pl-lg-3 py-3">
+                <h3>Profile</h3>
             </section>
-            <?php if (isset($_SESSION['updated'])) { ?> <!--Jika nilainya diset maka dimunculkan-->
-            <div class="container-sm fixed-bottom mr-3 mb-4" style="max-width: 350px">
-                <div class="alert btn-primary">
-                    Profil berhasil di update
-                    <a href="#" class="close text-white" data-dismiss="alert">&times;</a>
-                </div>
-            </div><?php unset($_SESSION['updated']);} ?>
-			<aside class="col-sm-3">
+			<aside class="col-9 col-md-5 mx-auto col-lg-4 col-xl-3">
                 <section class="container shadow card border-0 pb-3 pt-3">
-                    <img onerror="this.onerror=null; this.src='pfp/blank.png'" src=<?php echo $_SESSION['imgUrl'] . "?=" . filemtime($_SESSION['imgUrl']) ?>>
+                    <img onerror="this.onerror=null; this.src='pfp/blank.png'" src=<?php echo $_SESSION['imgUrl']?>>
                 </section><br>
             </aside>
-            <article class="col-sm-9 shadow bg-white pt-3 pb-4">
+            <article class="col-lg-8 col-xl-9 shadow bg-white pt-3 pb-4">
                 <div class="row">
-                    <section class="col-sm-6">
+                    <section class="col-lg-6">
                         <?php // Melakukan Loop untuk menampilkan data kiri
                         foreach($data_left as $term => $term_value) { ?>
 							<div class="form-group">
@@ -97,7 +86,7 @@ $data_right = array(
 							</div>
                         <?php } ?>
                     </section>
-                    <section class="col-sm-6">
+                    <section class="col-lg-6">
                         <?php // Melakukan Loop untuk menampilkan data kanan
                         foreach($data_right as $term => $term_value) { ?>
 							<div class="form-group">
@@ -108,10 +97,16 @@ $data_right = array(
                     </section>
                 </div>
             </article>
-            <div class="container-fluid text-right pt-5">
-                <button onclick="document.location='profile_update.php'" type="button" class="btn btn-primary">
-                    <i class='fas fa-edit'></i>&nbsp; Edit Profile
-                </button>
+
+            <div class="w-100 text-right row justify-content-end mx-auto pt-5">
+                <div class="col-lg-2">
+                    <button onclick="document.location='profile_update.php'" type="button" class="w-100 btn btn-primary">
+                        <i class='text-white fas fa-edit'></i>&nbsp; Edit Profile
+                    </button>
+                </div>
+                <div class="row mx-auto mx-lg-0 col-lg-2 pt-4 pt-lg-0 align-self-center">
+                    <a class="col text-decoration-none text-center text-secondary" href="index.php">kembali ke menu</a>
+                </div>
             </div>
         </main>
 
@@ -120,5 +115,20 @@ $data_right = array(
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="smoothscroll.js"></script>
+        <script>
+            $(document).ready(function(){
+                $("a").on('click', function(event) {
+                    if (this.hash !== "") {
+                        event.preventDefault();
+                        var hash = this.hash;
+
+                        $('html, body').animate({scrollTop: $(hash).offset().top}, 800, function(){
+                            window.location.hash = hash;
+                        });
+                    }
+                });
+            });
+        </script>
     </body>
 </html>
